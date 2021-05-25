@@ -418,17 +418,26 @@ namespace Rcpp {
         ::Rcpp::IntegerVector dims = mat.slot("Dim");
         ::Rcpp::Vector<RTYPE> x = mat.slot("x");
         ::Rcpp::IntegerVector i = mat.slot("i");
-        ::Rcpp::IntegerVector p = mat.slot("p");
         blaze::CompressedMatrix<Type,SO> result( (size_t) dims[0], (size_t) dims[1] );
 
-        int j = 0;
-        for( size_t k=0UL; k<(size_t)x.size(); ++k ) {
-          if ( k == (size_t) p[j+1] )
-            ++j;
-          result( i[k], j ) = x[k];
+        // dgTMatrix
+        if(mat.hasSlot("j")) {
+          ::Rcpp::IntegerVector j = mat.slot("j");  
+          for( size_t k=0UL; k<(size_t)x.size(); ++k ) {
+            result( i[k], j[k] ) = x[k];
+          }
+        } else {
+          ::Rcpp::IntegerVector p = mat.slot("p");
+          int j = 0;
+          for( size_t k=0UL; k<(size_t)x.size(); ++k ) {
+            if ( k == (size_t) p[j+1] )
+              ++j;
+            result( i[k], j ) = x[k];
+          }  
         }
         return result;
       }
+
     };
   } // end traits
 }
